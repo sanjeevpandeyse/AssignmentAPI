@@ -10,14 +10,15 @@ namespace AssignmentAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SearchStoryController : Controller
+    public class SearchStoryController : ControllerBase
     {
         private readonly NewsService _newsService;
         private readonly IMemoryCache _cache;
+
         public SearchStoryController(NewsService newsService, IMemoryCache cache)
         {
-            _newsService = newsService;
-            _cache = cache;
+            _newsService = newsService ?? throw new ArgumentNullException(nameof(newsService));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace AssignmentAPI.Controllers
                         return StatusCode(500, "Unable to fetch top stories from the API.");
                     }
 
-                    topStories = JsonConvert.DeserializeObject<List<string>>(topStoriesResponse);
+                    topStories = JsonConvert.DeserializeObject<List<string>>(topStoriesResponse) ?? new List<string>();
 
                     if (topStories == null)
                     {
@@ -63,46 +64,8 @@ namespace AssignmentAPI.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex}");
-
                 return StatusCode(500, "An error occurred while processing the request.");
             }
         }
-
-
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<NewsItem>>> GetNewsItems()
-        //{
-        //    try
-        //    {
-        //        var topStoriesResponse = await _newsService.GetTopStoriesAsync();
-        //        if (topStoriesResponse == null)
-        //        {
-        //            return StatusCode(500, "Unable to fetch top stories from the API.");
-        //        }
-        //        var topStories = JsonConvert.DeserializeObject<List<string>>(topStoriesResponse);
-        //        if (topStories == null)
-        //        {
-        //            return StatusCode(500, "Top stories list is null.");
-        //        }
-        //        var storyIds = topStories.Take(200).ToList();
-        //        var newsItems = new List<NewsItem>();
-        //        Parallel.ForEach(storyIds, async storyId =>
-        //        {
-        //            var newsItem = await _newsService.GetNewsItemAsync(storyId);
-        //            lock (newsItems)
-        //            {
-        //                newsItems.Add(newsItem);
-        //            }
-        //        });
-        //        return newsItems;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Handle exceptions, log errors, etc.
-        //        return StatusCode(500, "An error occurred while processing the request.");
-        //    }
-        //}
-
     }
 }
